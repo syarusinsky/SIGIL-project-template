@@ -17,7 +17,7 @@
 // #define EFFECT_BUTTON_PORT 		GPIO_PORT::E
 // #define EFFECT1_BUTTON_PIN 		GPIO_PIN::PIN_0
 // #define EFFECT2_BUTTON_PIN 		GPIO_PIN::PIN_1
-// #define LOGGING_USART_NUM 		USART_NUM::USART_2
+#define LOGGING_USART_NUM 		USART_NUM::USART_2
 #define SDRAM_CLK_PORT 			GPIO_PORT::G
 #define SDRAM_CLK_PIN 			GPIO_PIN::PIN_8
 #define SDRAM_NE0_PORT 			GPIO_PORT::C
@@ -82,8 +82,6 @@
 #define SDRAM_D6_PIN 			GPIO_PIN::PIN_9
 #define SDRAM_D7_PORT 			GPIO_PORT::E
 #define SDRAM_D7_PIN 			GPIO_PIN::PIN_10
-#define SDRAM_D7_PORT 			GPIO_PORT::E
-#define SDRAM_D7_PIN 			GPIO_PIN::PIN_10
 #define SDRAM_D8_PORT 			GPIO_PORT::E
 #define SDRAM_D8_PIN 			GPIO_PIN::PIN_11
 #define SDRAM_D9_PORT 			GPIO_PORT::E
@@ -102,6 +100,9 @@
 #define SDRAM_D15_PIN 			GPIO_PIN::PIN_10
 
 #define SDRAM1_MEM_START 		0xC0000000
+#define SDRAM2_MEM_START 		0xD0000000
+#define SDRAM_SIZE 			8000000
+#define SDRAM_FREQ 			75
 
 // these pins are unconnected on SIGIL Rev 2 development board, so we disable them as per the ST recommendations
 void disableUnusedPIns()
@@ -114,7 +115,7 @@ int main(void)
 {
 	// setup clock 480MHz (also prescales peripheral clocks to fit rate limitations)
 	LLPD::rcc_clock_start_max_cpu1();
-	LLPD::rcc_start_pll2();
+	LLPD::rcc_start_pll2( SDRAM_FREQ * 2 );
 
 	// enable gpio clocks
 	// LLPD::gpio_enable_clock( GPIO_PORT::A );
@@ -169,9 +170,9 @@ int main(void)
 	LLPD::gpio_output_setup( SDRAM_D15_PORT, SDRAM_D15_PIN, GPIO_PUPD::NONE, GPIO_OUTPUT_TYPE::PUSH_PULL, GPIO_OUTPUT_SPEED::VERY_HIGH, true, 12 );
 
 	// USART setup
-	// LLPD::usart_init( LOGGING_USART_NUM, USART_WORD_LENGTH::BITS_8, USART_PARITY::NONE, USART_CONF::TX_AND_RX,
-	// 			USART_STOP_BITS::BITS_1, 120000000, 9600 );
-	// LLPD::usart_log( LOGGING_USART_NUM, "SIGIL starting up ----------------------------" );
+	LLPD::usart_init( LOGGING_USART_NUM, USART_WORD_LENGTH::BITS_8, USART_PARITY::NONE, USART_CONF::TX_AND_RX,
+				USART_STOP_BITS::BITS_1, 120000000, 9600 );
+	LLPD::usart_log( LOGGING_USART_NUM, "SIGIL starting up ----------------------------" );
 
 	// timer setup (for 30 kHz sampling rate at 480 MHz / 2 timer clock)
 	LLPD::tim6_counter_setup( 0, 8000, 30000 );
@@ -196,29 +197,51 @@ int main(void)
 	LLPD::fmc_sdram_init( FMC_SDRAM_BANK::BANK_5, FMC_SDRAM_COL_ADDR_BITS::BITS_8, FMC_SDRAM_ROW_ADDR_BITS::BITS_12,
 			FMC_SDRAM_DATA_ADDR_BITS::BITS_16, FMC_SDRAM_NUM_BANKS::BANKS_4, FMC_SDRAM_CLOCK_CONFIG::CYCLES_2,
 			FMC_SDRAM_CAS_LATENCY::CYCLES_3, true, FMC_SDRAM_RPIPE_DELAY::CYCLES_2, false, 2, 11, 7, 9, 4, 3, 3 );
-	LLPD::fmc_sdram_start( true, false, 2, 64, 4096, 150, 0 | (0b011 << 4) | (0b1 << 9) );
-
-	// LLPD::usart_log( LOGGING_USART_NUM, "SIGIL setup complete, entering while loop -------------------------------" );
+	LLPD::fmc_sdram_init( FMC_SDRAM_BANK::BANK_6, FMC_SDRAM_COL_ADDR_BITS::BITS_8, FMC_SDRAM_ROW_ADDR_BITS::BITS_12,
+			FMC_SDRAM_DATA_ADDR_BITS::BITS_16, FMC_SDRAM_NUM_BANKS::BANKS_4, FMC_SDRAM_CLOCK_CONFIG::CYCLES_2,
+			FMC_SDRAM_CAS_LATENCY::CYCLES_3, true, FMC_SDRAM_RPIPE_DELAY::CYCLES_2, false, 2, 11, 7, 9, 4, 3, 3 );
+	LLPD::fmc_sdram_start( true, true, 2, 64, 4096, SDRAM_FREQ * 2, 0 | (0b011 << 4) | (0b1 << 9) );
 
 	// flush denormals
 	__set_FPSCR( __get_FPSCR() | (1 << 24) );
 
 	// enable instruction cache
-	// SCB_EnableICache();
+	SCB_EnableICache();
 
 	// enable data cache (will only be useful for constant values stored in flash)
-	// SCB_InvalidateDCache();
-	// SCB_EnableDCache();
+	SCB_InvalidateDCache();
+	SCB_EnableDCache();
 
-	uint8_t* someValue = (uint8_t*) SDRAM1_MEM_START;
+	volatile uint8_t* someValue1 = (volatile uint8_t*) SDRAM1_MEM_START;
+	volatile uint8_t* someValue2 = (volatile uint8_t*) SDRAM2_MEM_START;
+
+	// zero out sram
+	for ( unsigned int byte = 0; byte < SDRAM_SIZE; byte++ )
+	{
+		someValue1[byte] = 0;
+		someValue2[byte] = 0;
+
+		if ( someValue1[byte] != 0 || someValue2[byte] != 0 )
+		{
+			while ( true )
+			{
+				LLPD::usart_log( LOGGING_USART_NUM, "SDRAM zeroing failed! -------------------------------" );
+			}
+		}
+	}
+
+	LLPD::usart_log( LOGGING_USART_NUM, "SIGIL setup complete, entering while loop -------------------------------" );
 
 	while ( true )
 	{
-		*someValue += 2;
+		*someValue1 += 2;
+		*someValue2 += 1;
 
-		if ( *someValue >= 60 )
+		if ( *someValue1 >= 60 )
 		{
-			*someValue -=4;
+			*someValue1 -=4;
+			*someValue2 -= 1;
+			LLPD::usart_log_int( LOGGING_USART_NUM, "test: ", *someValue1 );
 		}
 
 		// LLPD::adc_perform_conversion_sequence( EFFECT_ADC_NUM );
