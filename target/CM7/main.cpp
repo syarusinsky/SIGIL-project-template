@@ -17,7 +17,7 @@
 // #define EFFECT_BUTTON_PORT 		GPIO_PORT::E
 // #define EFFECT1_BUTTON_PIN 		GPIO_PIN::PIN_0
 // #define EFFECT2_BUTTON_PIN 		GPIO_PIN::PIN_1
-#define LOGGING_USART_NUM 		USART_NUM::USART_2
+// #define LOGGING_USART_NUM 		USART_NUM::USART_2
 #define SDRAM_CLK_PORT 			GPIO_PORT::G
 #define SDRAM_CLK_PIN 			GPIO_PIN::PIN_8
 #define SDRAM_NE0_PORT 			GPIO_PORT::C
@@ -104,11 +104,70 @@
 #define SDRAM_SIZE 			8000000
 #define SDRAM_FREQ 			75
 
+#define LCD_BRIGHT_PORT 		GPIO_PORT::A
+#define LCD_BRIGHT_PIN 			GPIO_PIN::PIN_0
+#define LCD_DE_PORT 			GPIO_PORT::F
+#define LCD_DE_PIN 			GPIO_PIN::PIN_10
+#define LCD_CLK_PORT 			GPIO_PORT::G
+#define LCD_CLK_PIN 			GPIO_PIN::PIN_7
+#define LCD_VSYN_PORT 			GPIO_PORT::I
+#define LCD_VSYN_PIN 			GPIO_PIN::PIN_9
+#define LCD_HSYN_PORT 			GPIO_PORT::I
+#define LCD_HSYN_PIN 			GPIO_PIN::PIN_10
+#define LCD_R0_PORT 			GPIO_PORT::H
+#define LCD_R0_PIN 			GPIO_PIN::PIN_2
+#define LCD_R1_PORT 			GPIO_PORT::A
+#define LCD_R1_PIN 			GPIO_PIN::PIN_2
+#define LCD_R2_PORT 			GPIO_PORT::A
+#define LCD_R2_PIN 			GPIO_PIN::PIN_1
+#define LCD_R3_PORT 			GPIO_PORT::B
+#define LCD_R3_PIN 			GPIO_PIN::PIN_0
+#define LCD_R4_PORT 			GPIO_PORT::A
+#define LCD_R4_PIN 			GPIO_PIN::PIN_5
+#define LCD_R5_PORT 			GPIO_PORT::H
+#define LCD_R5_PIN 			GPIO_PIN::PIN_11
+#define LCD_R6_PORT 			GPIO_PORT::B
+#define LCD_R6_PIN 			GPIO_PIN::PIN_1
+#define LCD_R7_PORT 			GPIO_PORT::J
+#define LCD_R7_PIN 			GPIO_PIN::PIN_6
+#define LCD_G0_PORT 			GPIO_PORT::E
+#define LCD_G0_PIN 			GPIO_PIN::PIN_5
+#define LCD_G1_PORT 			GPIO_PORT::E
+#define LCD_G1_PIN 			GPIO_PIN::PIN_6
+#define LCD_G2_PORT 			GPIO_PORT::A
+#define LCD_G2_PIN 			GPIO_PIN::PIN_6
+#define LCD_G3_PORT 			GPIO_PORT::J
+#define LCD_G3_PIN 			GPIO_PIN::PIN_10
+#define LCD_G4_PORT 			GPIO_PORT::B
+#define LCD_G4_PIN 			GPIO_PIN::PIN_10
+#define LCD_G5_PORT 			GPIO_PORT::H
+#define LCD_G5_PIN 			GPIO_PIN::PIN_4
+#define LCD_G6_PORT 			GPIO_PORT::I
+#define LCD_G6_PIN 			GPIO_PIN::PIN_11
+#define LCD_G7_PORT 			GPIO_PORT::K
+#define LCD_G7_PIN 			GPIO_PIN::PIN_2
+#define LCD_B0_PORT 			GPIO_PORT::E
+#define LCD_B0_PIN 			GPIO_PIN::PIN_4
+#define LCD_B1_PORT 			GPIO_PORT::A
+#define LCD_B1_PIN 			GPIO_PIN::PIN_10
+#define LCD_B2_PORT 			GPIO_PORT::D
+#define LCD_B2_PIN 			GPIO_PIN::PIN_6
+#define LCD_B3_PORT 			GPIO_PORT::A
+#define LCD_B3_PIN 			GPIO_PIN::PIN_8
+#define LCD_B4_PORT 			GPIO_PORT::G
+#define LCD_B4_PIN 			GPIO_PIN::PIN_12
+#define LCD_B5_PORT 			GPIO_PORT::A
+#define LCD_B5_PIN 			GPIO_PIN::PIN_3
+#define LCD_B6_PORT 			GPIO_PORT::B
+#define LCD_B6_PIN 			GPIO_PIN::PIN_8
+#define LCD_B7_PORT 			GPIO_PORT::B
+#define LCD_B7_PIN 			GPIO_PIN::PIN_9
+
+
 // these pins are unconnected on SIGIL Rev 2 development board, so we disable them as per the ST recommendations
 void disableUnusedPIns()
 {
-	// LLPD::gpio_output_setup( GPIO_PORT::A, GPIO_PIN::PIN_1, GPIO_PUPD::PULL_DOWN, GPIO_OUTPUT_TYPE::PUSH_PULL,
-	// 				GPIO_OUTPUT_SPEED::LOW );
+	// LLPD::gpio_output_setup( GPIO_PORT::A, GPIO_PIN::PIN_1, GPIO_PUPD::PULL_DOWN, GPIO_OUTPUT_TYPE::PUSH_PULL, GPIO_OUTPUT_SPEED::LOW );
 }
 
 int main(void)
@@ -116,16 +175,24 @@ int main(void)
 	// setup clock 480MHz (also prescales peripheral clocks to fit rate limitations)
 	LLPD::rcc_clock_start_max_cpu1();
 	LLPD::rcc_start_pll2( SDRAM_FREQ * 2 );
+	LLPD::rcc_start_pll3();
 
 	// enable gpio clocks
-	// LLPD::gpio_enable_clock( GPIO_PORT::A );
-	// LLPD::gpio_enable_clock( GPIO_PORT::B );
+	LLPD::gpio_enable_clock( GPIO_PORT::A );
+	LLPD::gpio_enable_clock( GPIO_PORT::B );
 	LLPD::gpio_enable_clock( GPIO_PORT::C );
 	LLPD::gpio_enable_clock( GPIO_PORT::D );
 	LLPD::gpio_enable_clock( GPIO_PORT::E );
 	LLPD::gpio_enable_clock( GPIO_PORT::F );
 	LLPD::gpio_enable_clock( GPIO_PORT::G );
 	LLPD::gpio_enable_clock( GPIO_PORT::H );
+	LLPD::gpio_enable_clock( GPIO_PORT::I );
+	LLPD::gpio_enable_clock( GPIO_PORT::J );
+	LLPD::gpio_enable_clock( GPIO_PORT::K );
+
+	// turn lcd brightness off before anything
+	LLPD::gpio_output_setup( LCD_BRIGHT_PORT, LCD_BRIGHT_PIN, GPIO_PUPD::PULL_UP, GPIO_OUTPUT_TYPE::PUSH_PULL, GPIO_OUTPUT_SPEED::VERY_HIGH);
+	LLPD::gpio_output_set( LCD_BRIGHT_PORT, LCD_BRIGHT_PIN, false );
 
 	// setup sdram pins
 	LLPD::gpio_output_setup( SDRAM_CLK_PORT, SDRAM_CLK_PIN, GPIO_PUPD::NONE, GPIO_OUTPUT_TYPE::PUSH_PULL, GPIO_OUTPUT_SPEED::VERY_HIGH, true, 12 );
@@ -169,10 +236,40 @@ int main(void)
 	LLPD::gpio_output_setup( SDRAM_D14_PORT, SDRAM_D14_PIN, GPIO_PUPD::NONE, GPIO_OUTPUT_TYPE::PUSH_PULL, GPIO_OUTPUT_SPEED::VERY_HIGH, true, 12 );
 	LLPD::gpio_output_setup( SDRAM_D15_PORT, SDRAM_D15_PIN, GPIO_PUPD::NONE, GPIO_OUTPUT_TYPE::PUSH_PULL, GPIO_OUTPUT_SPEED::VERY_HIGH, true, 12 );
 
+	// setup lcd pins
+	LLPD::gpio_output_setup( LCD_DE_PORT, LCD_DE_PIN, GPIO_PUPD::NONE, GPIO_OUTPUT_TYPE::PUSH_PULL, GPIO_OUTPUT_SPEED::VERY_HIGH, true, 14 );
+	LLPD::gpio_output_setup( LCD_CLK_PORT, LCD_CLK_PIN, GPIO_PUPD::NONE, GPIO_OUTPUT_TYPE::PUSH_PULL, GPIO_OUTPUT_SPEED::VERY_HIGH, true, 14 );
+	LLPD::gpio_output_setup( LCD_VSYN_PORT, LCD_VSYN_PIN, GPIO_PUPD::NONE, GPIO_OUTPUT_TYPE::PUSH_PULL, GPIO_OUTPUT_SPEED::VERY_HIGH, true, 14 );
+	LLPD::gpio_output_setup( LCD_HSYN_PORT, LCD_HSYN_PIN, GPIO_PUPD::NONE, GPIO_OUTPUT_TYPE::PUSH_PULL, GPIO_OUTPUT_SPEED::VERY_HIGH, true, 14 );
+	LLPD::gpio_output_setup( LCD_R0_PORT, LCD_R0_PIN, GPIO_PUPD::NONE, GPIO_OUTPUT_TYPE::PUSH_PULL, GPIO_OUTPUT_SPEED::VERY_HIGH, true, 14 );
+	LLPD::gpio_output_setup( LCD_R1_PORT, LCD_R1_PIN, GPIO_PUPD::NONE, GPIO_OUTPUT_TYPE::PUSH_PULL, GPIO_OUTPUT_SPEED::VERY_HIGH, true, 14 );
+	LLPD::gpio_output_setup( LCD_R2_PORT, LCD_R2_PIN, GPIO_PUPD::NONE, GPIO_OUTPUT_TYPE::PUSH_PULL, GPIO_OUTPUT_SPEED::VERY_HIGH, true, 14 );
+	LLPD::gpio_output_setup( LCD_R3_PORT, LCD_R3_PIN, GPIO_PUPD::NONE, GPIO_OUTPUT_TYPE::PUSH_PULL, GPIO_OUTPUT_SPEED::VERY_HIGH, true, 14 );
+	LLPD::gpio_output_setup( LCD_R4_PORT, LCD_R4_PIN, GPIO_PUPD::NONE, GPIO_OUTPUT_TYPE::PUSH_PULL, GPIO_OUTPUT_SPEED::VERY_HIGH, true, 14 );
+	LLPD::gpio_output_setup( LCD_R5_PORT, LCD_R5_PIN, GPIO_PUPD::NONE, GPIO_OUTPUT_TYPE::PUSH_PULL, GPIO_OUTPUT_SPEED::VERY_HIGH, true, 14 );
+	LLPD::gpio_output_setup( LCD_R6_PORT, LCD_R6_PIN, GPIO_PUPD::NONE, GPIO_OUTPUT_TYPE::PUSH_PULL, GPIO_OUTPUT_SPEED::VERY_HIGH, true, 14 );
+	LLPD::gpio_output_setup( LCD_R7_PORT, LCD_R7_PIN, GPIO_PUPD::NONE, GPIO_OUTPUT_TYPE::PUSH_PULL, GPIO_OUTPUT_SPEED::VERY_HIGH, true, 14 );
+	LLPD::gpio_output_setup( LCD_G0_PORT, LCD_G0_PIN, GPIO_PUPD::NONE, GPIO_OUTPUT_TYPE::PUSH_PULL, GPIO_OUTPUT_SPEED::VERY_HIGH, true, 14 );
+	LLPD::gpio_output_setup( LCD_G1_PORT, LCD_G1_PIN, GPIO_PUPD::NONE, GPIO_OUTPUT_TYPE::PUSH_PULL, GPIO_OUTPUT_SPEED::VERY_HIGH, true, 14 );
+	LLPD::gpio_output_setup( LCD_G2_PORT, LCD_G2_PIN, GPIO_PUPD::NONE, GPIO_OUTPUT_TYPE::PUSH_PULL, GPIO_OUTPUT_SPEED::VERY_HIGH, true, 14 );
+	LLPD::gpio_output_setup( LCD_G3_PORT, LCD_G3_PIN, GPIO_PUPD::NONE, GPIO_OUTPUT_TYPE::PUSH_PULL, GPIO_OUTPUT_SPEED::VERY_HIGH, true, 14 );
+	LLPD::gpio_output_setup( LCD_G4_PORT, LCD_G4_PIN, GPIO_PUPD::NONE, GPIO_OUTPUT_TYPE::PUSH_PULL, GPIO_OUTPUT_SPEED::VERY_HIGH, true, 14 );
+	LLPD::gpio_output_setup( LCD_G5_PORT, LCD_G5_PIN, GPIO_PUPD::NONE, GPIO_OUTPUT_TYPE::PUSH_PULL, GPIO_OUTPUT_SPEED::VERY_HIGH, true, 14 );
+	LLPD::gpio_output_setup( LCD_G6_PORT, LCD_G6_PIN, GPIO_PUPD::NONE, GPIO_OUTPUT_TYPE::PUSH_PULL, GPIO_OUTPUT_SPEED::VERY_HIGH, true, 14 );
+	LLPD::gpio_output_setup( LCD_G7_PORT, LCD_G7_PIN, GPIO_PUPD::NONE, GPIO_OUTPUT_TYPE::PUSH_PULL, GPIO_OUTPUT_SPEED::VERY_HIGH, true, 14 );
+	LLPD::gpio_output_setup( LCD_B0_PORT, LCD_B0_PIN, GPIO_PUPD::NONE, GPIO_OUTPUT_TYPE::PUSH_PULL, GPIO_OUTPUT_SPEED::VERY_HIGH, true, 14 );
+	LLPD::gpio_output_setup( LCD_B1_PORT, LCD_B1_PIN, GPIO_PUPD::NONE, GPIO_OUTPUT_TYPE::PUSH_PULL, GPIO_OUTPUT_SPEED::VERY_HIGH, true, 14 );
+	LLPD::gpio_output_setup( LCD_B2_PORT, LCD_B2_PIN, GPIO_PUPD::NONE, GPIO_OUTPUT_TYPE::PUSH_PULL, GPIO_OUTPUT_SPEED::VERY_HIGH, true, 14 );
+	LLPD::gpio_output_setup( LCD_B3_PORT, LCD_B3_PIN, GPIO_PUPD::NONE, GPIO_OUTPUT_TYPE::PUSH_PULL, GPIO_OUTPUT_SPEED::VERY_HIGH, true, 14 );
+	LLPD::gpio_output_setup( LCD_B4_PORT, LCD_B4_PIN, GPIO_PUPD::NONE, GPIO_OUTPUT_TYPE::PUSH_PULL, GPIO_OUTPUT_SPEED::VERY_HIGH, true, 14 );
+	LLPD::gpio_output_setup( LCD_B5_PORT, LCD_B5_PIN, GPIO_PUPD::NONE, GPIO_OUTPUT_TYPE::PUSH_PULL, GPIO_OUTPUT_SPEED::VERY_HIGH, true, 14 );
+	LLPD::gpio_output_setup( LCD_B6_PORT, LCD_B6_PIN, GPIO_PUPD::NONE, GPIO_OUTPUT_TYPE::PUSH_PULL, GPIO_OUTPUT_SPEED::VERY_HIGH, true, 14 );
+	LLPD::gpio_output_setup( LCD_B7_PORT, LCD_B7_PIN, GPIO_PUPD::NONE, GPIO_OUTPUT_TYPE::PUSH_PULL, GPIO_OUTPUT_SPEED::VERY_HIGH, true, 14 );
+
 	// USART setup
-	LLPD::usart_init( LOGGING_USART_NUM, USART_WORD_LENGTH::BITS_8, USART_PARITY::NONE, USART_CONF::TX_AND_RX,
-				USART_STOP_BITS::BITS_1, 120000000, 9600 );
-	LLPD::usart_log( LOGGING_USART_NUM, "SIGIL starting up ----------------------------" );
+	// LLPD::usart_init( LOGGING_USART_NUM, USART_WORD_LENGTH::BITS_8, USART_PARITY::NONE, USART_CONF::TX_AND_RX,
+	// 			USART_STOP_BITS::BITS_1, 120000000, 9600 );
+	// LLPD::usart_log( LOGGING_USART_NUM, "SIGIL starting up ----------------------------" );
 
 	// timer setup (for 30 kHz sampling rate at 480 MHz / 2 timer clock)
 	LLPD::tim6_counter_setup( 0, 8000, 30000 );
@@ -225,12 +322,13 @@ int main(void)
 		{
 			while ( true )
 			{
-				LLPD::usart_log( LOGGING_USART_NUM, "SDRAM zeroing failed! -------------------------------" );
+				someValue1 = (volatile uint8_t*) SDRAM1_MEM_START;
+				// LLPD::usart_log( LOGGING_USART_NUM, "SDRAM zeroing failed! -------------------------------" );
 			}
 		}
 	}
 
-	LLPD::usart_log( LOGGING_USART_NUM, "SIGIL setup complete, entering while loop -------------------------------" );
+	// LLPD::usart_log( LOGGING_USART_NUM, "SIGIL setup complete, entering while loop -------------------------------" );
 
 	while ( true )
 	{
@@ -241,7 +339,7 @@ int main(void)
 		{
 			*someValue1 -=4;
 			*someValue2 -= 1;
-			LLPD::usart_log_int( LOGGING_USART_NUM, "test: ", *someValue1 );
+			// LLPD::usart_log_int( LOGGING_USART_NUM, "test: ", *someValue1 );
 		}
 
 		// LLPD::adc_perform_conversion_sequence( EFFECT_ADC_NUM );
