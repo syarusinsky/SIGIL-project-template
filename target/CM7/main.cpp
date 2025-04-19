@@ -328,18 +328,23 @@ int main(void)
 		}
 	}
 
+	LLPD::ltdc_init( 48, 88, 40, 800, 3, 32, 13, 480, LTDC_HSYNC_POL::ACTIVE_LOW, LTDC_VSYNC_POL::ACTIVE_LOW, LTDC_DE_POL::ACTIVE_LOW,
+				LTDC_PCLK_POL::ACTIVE_LOW, 0, 0, 0 );
+	LLPD::ltdc_layer_init( LTDC_LAYER::LAYER_1, 0, 800, 0, 480, LTDC_PIXEL_FORMAT::RGB888, 255, 0, LTDC_BLEND_FACTOR1::CONSTANT_ALPHA,
+				LTDC_BLEND_FACTOR2::ONE_MINUS_CONSTANT_ALPHA, SDRAM1_MEM_START, 800, 480, 0, 0, 0 );
+	LLPD::ltdc_layer_enable( LTDC_LAYER::LAYER_1 );
+	LLPD::ltdc_start();
+	LLPD::gpio_output_set( LCD_BRIGHT_PORT, LCD_BRIGHT_PIN, true );
+
 	// LLPD::usart_log( LOGGING_USART_NUM, "SIGIL setup complete, entering while loop -------------------------------" );
 
 	while ( true )
 	{
-		*someValue1 += 2;
-		*someValue2 += 1;
-
-		if ( *someValue1 >= 60 )
+		for ( unsigned int pixel = 0; pixel < 800 * 480; pixel++ )
 		{
-			*someValue1 -=4;
-			*someValue2 -= 1;
-			// LLPD::usart_log_int( LOGGING_USART_NUM, "test: ", *someValue1 );
+			someValue1[(pixel * 3) + 0] = 255;
+			someValue1[(pixel * 3) + 1] = 0;
+			someValue1[(pixel * 3) + 2] = 0;
 		}
 
 		// LLPD::adc_perform_conversion_sequence( EFFECT_ADC_NUM );
