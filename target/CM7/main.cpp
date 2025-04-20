@@ -244,24 +244,24 @@ int main(void)
 	LLPD::gpio_output_setup( LCD_R0_PORT, LCD_R0_PIN, GPIO_PUPD::NONE, GPIO_OUTPUT_TYPE::PUSH_PULL, GPIO_OUTPUT_SPEED::VERY_HIGH, true, 14 );
 	LLPD::gpio_output_setup( LCD_R1_PORT, LCD_R1_PIN, GPIO_PUPD::NONE, GPIO_OUTPUT_TYPE::PUSH_PULL, GPIO_OUTPUT_SPEED::VERY_HIGH, true, 14 );
 	LLPD::gpio_output_setup( LCD_R2_PORT, LCD_R2_PIN, GPIO_PUPD::NONE, GPIO_OUTPUT_TYPE::PUSH_PULL, GPIO_OUTPUT_SPEED::VERY_HIGH, true, 14 );
-	LLPD::gpio_output_setup( LCD_R3_PORT, LCD_R3_PIN, GPIO_PUPD::NONE, GPIO_OUTPUT_TYPE::PUSH_PULL, GPIO_OUTPUT_SPEED::VERY_HIGH, true, 14 );
+	LLPD::gpio_output_setup( LCD_R3_PORT, LCD_R3_PIN, GPIO_PUPD::NONE, GPIO_OUTPUT_TYPE::PUSH_PULL, GPIO_OUTPUT_SPEED::VERY_HIGH, true, 9 );
 	LLPD::gpio_output_setup( LCD_R4_PORT, LCD_R4_PIN, GPIO_PUPD::NONE, GPIO_OUTPUT_TYPE::PUSH_PULL, GPIO_OUTPUT_SPEED::VERY_HIGH, true, 14 );
 	LLPD::gpio_output_setup( LCD_R5_PORT, LCD_R5_PIN, GPIO_PUPD::NONE, GPIO_OUTPUT_TYPE::PUSH_PULL, GPIO_OUTPUT_SPEED::VERY_HIGH, true, 14 );
-	LLPD::gpio_output_setup( LCD_R6_PORT, LCD_R6_PIN, GPIO_PUPD::NONE, GPIO_OUTPUT_TYPE::PUSH_PULL, GPIO_OUTPUT_SPEED::VERY_HIGH, true, 14 );
+	LLPD::gpio_output_setup( LCD_R6_PORT, LCD_R6_PIN, GPIO_PUPD::NONE, GPIO_OUTPUT_TYPE::PUSH_PULL, GPIO_OUTPUT_SPEED::VERY_HIGH, true, 9 );
 	LLPD::gpio_output_setup( LCD_R7_PORT, LCD_R7_PIN, GPIO_PUPD::NONE, GPIO_OUTPUT_TYPE::PUSH_PULL, GPIO_OUTPUT_SPEED::VERY_HIGH, true, 14 );
 	LLPD::gpio_output_setup( LCD_G0_PORT, LCD_G0_PIN, GPIO_PUPD::NONE, GPIO_OUTPUT_TYPE::PUSH_PULL, GPIO_OUTPUT_SPEED::VERY_HIGH, true, 14 );
 	LLPD::gpio_output_setup( LCD_G1_PORT, LCD_G1_PIN, GPIO_PUPD::NONE, GPIO_OUTPUT_TYPE::PUSH_PULL, GPIO_OUTPUT_SPEED::VERY_HIGH, true, 14 );
 	LLPD::gpio_output_setup( LCD_G2_PORT, LCD_G2_PIN, GPIO_PUPD::NONE, GPIO_OUTPUT_TYPE::PUSH_PULL, GPIO_OUTPUT_SPEED::VERY_HIGH, true, 14 );
 	LLPD::gpio_output_setup( LCD_G3_PORT, LCD_G3_PIN, GPIO_PUPD::NONE, GPIO_OUTPUT_TYPE::PUSH_PULL, GPIO_OUTPUT_SPEED::VERY_HIGH, true, 14 );
 	LLPD::gpio_output_setup( LCD_G4_PORT, LCD_G4_PIN, GPIO_PUPD::NONE, GPIO_OUTPUT_TYPE::PUSH_PULL, GPIO_OUTPUT_SPEED::VERY_HIGH, true, 14 );
-	LLPD::gpio_output_setup( LCD_G5_PORT, LCD_G5_PIN, GPIO_PUPD::NONE, GPIO_OUTPUT_TYPE::PUSH_PULL, GPIO_OUTPUT_SPEED::VERY_HIGH, true, 14 );
-	LLPD::gpio_output_setup( LCD_G6_PORT, LCD_G6_PIN, GPIO_PUPD::NONE, GPIO_OUTPUT_TYPE::PUSH_PULL, GPIO_OUTPUT_SPEED::VERY_HIGH, true, 14 );
+	LLPD::gpio_output_setup( LCD_G5_PORT, LCD_G5_PIN, GPIO_PUPD::NONE, GPIO_OUTPUT_TYPE::PUSH_PULL, GPIO_OUTPUT_SPEED::VERY_HIGH, true, 9 );
+	LLPD::gpio_output_setup( LCD_G6_PORT, LCD_G6_PIN, GPIO_PUPD::NONE, GPIO_OUTPUT_TYPE::PUSH_PULL, GPIO_OUTPUT_SPEED::VERY_HIGH, true, 9 );
 	LLPD::gpio_output_setup( LCD_G7_PORT, LCD_G7_PIN, GPIO_PUPD::NONE, GPIO_OUTPUT_TYPE::PUSH_PULL, GPIO_OUTPUT_SPEED::VERY_HIGH, true, 14 );
 	LLPD::gpio_output_setup( LCD_B0_PORT, LCD_B0_PIN, GPIO_PUPD::NONE, GPIO_OUTPUT_TYPE::PUSH_PULL, GPIO_OUTPUT_SPEED::VERY_HIGH, true, 14 );
 	LLPD::gpio_output_setup( LCD_B1_PORT, LCD_B1_PIN, GPIO_PUPD::NONE, GPIO_OUTPUT_TYPE::PUSH_PULL, GPIO_OUTPUT_SPEED::VERY_HIGH, true, 14 );
 	LLPD::gpio_output_setup( LCD_B2_PORT, LCD_B2_PIN, GPIO_PUPD::NONE, GPIO_OUTPUT_TYPE::PUSH_PULL, GPIO_OUTPUT_SPEED::VERY_HIGH, true, 14 );
-	LLPD::gpio_output_setup( LCD_B3_PORT, LCD_B3_PIN, GPIO_PUPD::NONE, GPIO_OUTPUT_TYPE::PUSH_PULL, GPIO_OUTPUT_SPEED::VERY_HIGH, true, 14 );
-	LLPD::gpio_output_setup( LCD_B4_PORT, LCD_B4_PIN, GPIO_PUPD::NONE, GPIO_OUTPUT_TYPE::PUSH_PULL, GPIO_OUTPUT_SPEED::VERY_HIGH, true, 14 );
+	LLPD::gpio_output_setup( LCD_B3_PORT, LCD_B3_PIN, GPIO_PUPD::NONE, GPIO_OUTPUT_TYPE::PUSH_PULL, GPIO_OUTPUT_SPEED::VERY_HIGH, true, 13 );
+	LLPD::gpio_output_setup( LCD_B4_PORT, LCD_B4_PIN, GPIO_PUPD::NONE, GPIO_OUTPUT_TYPE::PUSH_PULL, GPIO_OUTPUT_SPEED::VERY_HIGH, true, 9 );
 	LLPD::gpio_output_setup( LCD_B5_PORT, LCD_B5_PIN, GPIO_PUPD::NONE, GPIO_OUTPUT_TYPE::PUSH_PULL, GPIO_OUTPUT_SPEED::VERY_HIGH, true, 14 );
 	LLPD::gpio_output_setup( LCD_B6_PORT, LCD_B6_PIN, GPIO_PUPD::NONE, GPIO_OUTPUT_TYPE::PUSH_PULL, GPIO_OUTPUT_SPEED::VERY_HIGH, true, 14 );
 	LLPD::gpio_output_setup( LCD_B7_PORT, LCD_B7_PIN, GPIO_PUPD::NONE, GPIO_OUTPUT_TYPE::PUSH_PULL, GPIO_OUTPUT_SPEED::VERY_HIGH, true, 14 );
@@ -290,6 +290,30 @@ int main(void)
 	// LLPD::gpio_digital_input_setup( EFFECT_BUTTON_PORT, EFFECT1_BUTTON_PIN, GPIO_PUPD::PULL_UP );
 	// LLPD::gpio_digital_input_setup( EFFECT_BUTTON_PORT, EFFECT2_BUTTON_PIN, GPIO_PUPD::PULL_UP );
 
+	// setup mpu for sdram region to prevent unaligned access
+	// TODO in the future, test this with "cachable" and see if it makes a difference
+	// disable mpu
+	__DMB();
+	SCB->SHCSR &= ~SCB_SHCSR_MEMFAULTENA_Msk;
+	MPU->CTRL = 0;
+	// region config for sdram as non-cacheable
+	MPU->RNR = 0;
+	MPU->RBAR = SDRAM1_MEM_START;
+	MPU->RASR = 	0 			 	<< 	MPU_RASR_XN_Pos 	|
+			ARM_MPU_AP_FULL 	 	<< 	MPU_RASR_AP_Pos 	|
+			1 			 	<< 	MPU_RASR_TEX_Pos 	|
+			0 			 	<< 	MPU_RASR_S_Pos 		|
+			0 			 	<< 	MPU_RASR_C_Pos 		|
+			0 			 	<< 	MPU_RASR_B_Pos 		|
+			0 			 	<< 	MPU_RASR_SRD_Pos 	|
+			ARM_MPU_REGION_SIZE_8MB 	<< 	MPU_RASR_SIZE_Pos 	|
+			1 				<< 	MPU_RASR_ENABLE_Pos;
+	// enable mpu
+	MPU->CTRL = MPU_CTRL_PRIVDEFENA_Msk | MPU_CTRL_ENABLE_Msk;
+	SCB->SHCSR |= SCB_SHCSR_MEMFAULTENA_Msk;
+	__DSB();
+	__ISB();
+
 	// sdram setup
 	LLPD::fmc_sdram_init( FMC_SDRAM_BANK::BANK_5, FMC_SDRAM_COL_ADDR_BITS::BITS_8, FMC_SDRAM_ROW_ADDR_BITS::BITS_12,
 			FMC_SDRAM_DATA_ADDR_BITS::BITS_16, FMC_SDRAM_NUM_BANKS::BANKS_4, FMC_SDRAM_CLOCK_CONFIG::CYCLES_2,
@@ -299,32 +323,51 @@ int main(void)
 			FMC_SDRAM_CAS_LATENCY::CYCLES_3, true, FMC_SDRAM_RPIPE_DELAY::CYCLES_2, false, 2, 11, 7, 9, 4, 3, 3 );
 	LLPD::fmc_sdram_start( true, true, 2, 64, 4096, SDRAM_FREQ * 2, 0 | (0b011 << 4) | (0b1 << 9) );
 
-	// flush denormals
-	__set_FPSCR( __get_FPSCR() | (1 << 24) );
+	uint8_t* sram1Ptr = (uint8_t*) SDRAM1_MEM_START;
+	uint8_t* sram2Ptr = (uint8_t*) SDRAM2_MEM_START;
 
-	// enable instruction cache
-	SCB_EnableICache();
-
-	// enable data cache (will only be useful for constant values stored in flash)
-	SCB_InvalidateDCache();
-	SCB_EnableDCache();
-
-	volatile uint8_t* someValue1 = (volatile uint8_t*) SDRAM1_MEM_START;
-	volatile uint8_t* someValue2 = (volatile uint8_t*) SDRAM2_MEM_START;
-
-	// zero out sram
+	// zero out sdram
 	for ( unsigned int byte = 0; byte < SDRAM_SIZE; byte++ )
 	{
-		someValue1[byte] = 0;
-		someValue2[byte] = 0;
+		sram1Ptr[byte] = 213;
+		sram2Ptr[byte] = 213;
 
-		if ( someValue1[byte] != 0 || someValue2[byte] != 0 )
+		if ( sram1Ptr[byte] != 213 || sram2Ptr[byte] != 213 )
 		{
 			while ( true )
 			{
-				someValue1 = (volatile uint8_t*) SDRAM1_MEM_START;
 				// LLPD::usart_log( LOGGING_USART_NUM, "SDRAM zeroing failed! -------------------------------" );
 			}
+		}
+	}
+
+	for ( unsigned int pixel = 0; pixel < 800 * 480; pixel++ )
+	{
+		sram1Ptr[(pixel * 3) + 0] = 0; 		// b
+		sram1Ptr[(pixel * 3) + 1] = 0; 		// g
+		sram1Ptr[(pixel * 3) + 2] = 255; 	// r
+	}
+
+	// TODO right now the sdram is failing to correctly write these values, need to fix this
+	for ( unsigned int pixel = 0; pixel < 800 * 480; pixel++ )
+	{
+		uint8_t b = sram1Ptr[(pixel * 3) + 0];
+		uint8_t g = sram1Ptr[(pixel * 3) + 1];
+		uint8_t r = sram1Ptr[(pixel * 3) + 2];
+
+		if ( r != 255 )
+		{
+			while ( true ) {}
+		}
+
+		if ( g != 0 )
+		{
+			while ( true ) {}
+		}
+
+		if ( b != 0 )
+		{
+			while ( true ) {}
 		}
 	}
 
@@ -336,17 +379,24 @@ int main(void)
 	LLPD::ltdc_start();
 	LLPD::gpio_output_set( LCD_BRIGHT_PORT, LCD_BRIGHT_PIN, true );
 
+	// flush denormals
+	__set_FPSCR( __get_FPSCR() | (1 << 24) );
+
+	// enable instruction cache
+	SCB_EnableICache();
+
+	// enable data cache (will only be useful for constant values stored in flash)
+	SCB_InvalidateDCache();
+	SCB_EnableDCache();
+
 	// LLPD::usart_log( LOGGING_USART_NUM, "SIGIL setup complete, entering while loop -------------------------------" );
+
+	// TODO remove after testing
+	SCB->SHCSR |= SCB_SHCSR_USGFAULTENA_Msk | SCB_SHCSR_BUSFAULTENA_Msk | SCB_SHCSR_MEMFAULTENA_Msk;
+	SCB->CCR &= ~(SCB_CCR_UNALIGN_TRP_Msk);
 
 	while ( true )
 	{
-		for ( unsigned int pixel = 0; pixel < 800 * 480; pixel++ )
-		{
-			someValue1[(pixel * 3) + 0] = 255;
-			someValue1[(pixel * 3) + 1] = 0;
-			someValue1[(pixel * 3) + 2] = 0;
-		}
-
 		// LLPD::adc_perform_conversion_sequence( EFFECT_ADC_NUM );
 		// uint16_t effect1Val = LLPD::adc_get_channel_value( EFFECT_ADC_NUM, EFFECT1_ADC_CHANNEL );
 		// uint16_t effect2Val = LLPD::adc_get_channel_value( EFFECT_ADC_NUM, EFFECT2_ADC_CHANNEL );
@@ -372,4 +422,44 @@ extern "C" void USART2_IRQHandler (void) // logging usart
 	// loopback test code for usart recieve
 	// uint16_t data = LLPD::usart_receive( LOGGING_USART_NUM );
 	// LLPD::usart_transmit( LOGGING_USART_NUM, data );
+}
+
+extern "C" void HardFault_Handler (void)
+{
+	while (1)
+	{
+		volatile uint32_t cfsrReg = SCB->CFSR;
+		SCB->CFSR = cfsrReg;
+		// LLPD::usart_log( LOGGING_USART_NUM, "Hard Faulting -----------------------------" );
+	}
+}
+
+extern "C" void MemManage_Handler (void)
+{
+	while (1)
+	{
+		volatile uint32_t cfsrReg = SCB->CFSR;
+		SCB->CFSR = cfsrReg;
+		// LLPD::usart_log( LOGGING_USART_NUM, "Mem Manage Faulting -----------------------------" );
+	}
+}
+
+extern "C" void BusFault_Handler (void)
+{
+	while (1)
+	{
+		volatile uint32_t cfsrReg = SCB->CFSR;
+		SCB->CFSR = cfsrReg;
+		// LLPD::usart_log( LOGGING_USART_NUM, "Bus Faulting -----------------------------" );
+	}
+}
+
+extern "C" void UsageFault_Handler (void)
+{
+	while (1)
+	{
+		volatile uint32_t cfsrReg = SCB->CFSR;
+		SCB->CFSR = cfsrReg;
+		// LLPD::usart_log( LOGGING_USART_NUM, "Usage Faulting -----------------------------" );
+	}
 }
