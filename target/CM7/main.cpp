@@ -17,7 +17,7 @@
 // #define EFFECT_BUTTON_PORT 		GPIO_PORT::E
 // #define EFFECT1_BUTTON_PIN 		GPIO_PIN::PIN_0
 // #define EFFECT2_BUTTON_PIN 		GPIO_PIN::PIN_1
-// #define LOGGING_USART_NUM 		USART_NUM::USART_2
+#define LOGGING_USART_NUM 		USART_NUM::USART_1
 #define SDRAM_CLK_PORT 			GPIO_PORT::G
 #define SDRAM_CLK_PIN 			GPIO_PIN::PIN_8
 #define SDRAM_NE0_PORT 			GPIO_PORT::C
@@ -303,7 +303,7 @@ int main(void)
 			ARM_MPU_AP_FULL 	 	<< 	MPU_RASR_AP_Pos 	|
 			1 			 	<< 	MPU_RASR_TEX_Pos 	|
 			0 			 	<< 	MPU_RASR_S_Pos 		|
-			0 			 	<< 	MPU_RASR_C_Pos 		|
+			0 			 	<< 	MPU_RASR_C_Pos 		| // TODO maybe setting cachable will be faster?
 			0 			 	<< 	MPU_RASR_B_Pos 		|
 			0 			 	<< 	MPU_RASR_SRD_Pos 	|
 			ARM_MPU_REGION_SIZE_8MB 	<< 	MPU_RASR_SIZE_Pos 	|
@@ -317,11 +317,11 @@ int main(void)
 	// sdram setup
 	LLPD::fmc_sdram_init( FMC_SDRAM_BANK::BANK_5, FMC_SDRAM_COL_ADDR_BITS::BITS_8, FMC_SDRAM_ROW_ADDR_BITS::BITS_12,
 			FMC_SDRAM_DATA_ADDR_BITS::BITS_16, FMC_SDRAM_NUM_BANKS::BANKS_4, FMC_SDRAM_CLOCK_CONFIG::CYCLES_2,
-			FMC_SDRAM_CAS_LATENCY::CYCLES_3, true, FMC_SDRAM_RPIPE_DELAY::CYCLES_2, false, 2, 11, 7, 9, 4, 3, 3 );
+			FMC_SDRAM_CAS_LATENCY::CYCLES_3, true, FMC_SDRAM_RPIPE_DELAY::CYCLES_2, false, 2, 6, 4, 5, 4, 2, 2 );
 	LLPD::fmc_sdram_init( FMC_SDRAM_BANK::BANK_6, FMC_SDRAM_COL_ADDR_BITS::BITS_8, FMC_SDRAM_ROW_ADDR_BITS::BITS_12,
 			FMC_SDRAM_DATA_ADDR_BITS::BITS_16, FMC_SDRAM_NUM_BANKS::BANKS_4, FMC_SDRAM_CLOCK_CONFIG::CYCLES_2,
-			FMC_SDRAM_CAS_LATENCY::CYCLES_3, true, FMC_SDRAM_RPIPE_DELAY::CYCLES_2, false, 2, 11, 7, 9, 4, 3, 3 );
-	LLPD::fmc_sdram_start( true, true, 2, 64, 4096, SDRAM_FREQ * 2, 0 | (0b011 << 4) | (0b1 << 9) );
+			FMC_SDRAM_CAS_LATENCY::CYCLES_3, true, FMC_SDRAM_RPIPE_DELAY::CYCLES_2, false, 2, 6, 4, 5, 4, 2, 2 );
+	LLPD::fmc_sdram_start( true, true, 2, 64, 4096, SDRAM_FREQ, (0b011 << 4) ); // | (0b1 << 9) );
 
 	uint8_t* sram1Ptr = (uint8_t*) SDRAM1_MEM_START;
 	uint8_t* sram2Ptr = (uint8_t*) SDRAM2_MEM_START;
@@ -329,45 +329,15 @@ int main(void)
 	// zero out sdram
 	for ( unsigned int byte = 0; byte < SDRAM_SIZE; byte++ )
 	{
-		sram1Ptr[byte] = 213;
-		sram2Ptr[byte] = 213;
+		sram1Ptr[byte] = 0;
+		sram2Ptr[byte] = 0;
 
-		if ( sram1Ptr[byte] != 213 || sram2Ptr[byte] != 213 )
+		if ( sram1Ptr[byte] != 0 || sram2Ptr[byte] != 0 )
 		{
 			while ( true )
 			{
 				// LLPD::usart_log( LOGGING_USART_NUM, "SDRAM zeroing failed! -------------------------------" );
 			}
-		}
-	}
-
-	for ( unsigned int pixel = 0; pixel < 800 * 480; pixel++ )
-	{
-		sram1Ptr[(pixel * 3) + 0] = 0; 		// b
-		sram1Ptr[(pixel * 3) + 1] = 0; 		// g
-		sram1Ptr[(pixel * 3) + 2] = 255; 	// r
-	}
-
-	// TODO right now the sdram is failing to correctly write these values, need to fix this
-	for ( unsigned int pixel = 0; pixel < 800 * 480; pixel++ )
-	{
-		uint8_t b = sram1Ptr[(pixel * 3) + 0];
-		uint8_t g = sram1Ptr[(pixel * 3) + 1];
-		uint8_t r = sram1Ptr[(pixel * 3) + 2];
-
-		if ( r != 255 )
-		{
-			while ( true ) {}
-		}
-
-		if ( g != 0 )
-		{
-			while ( true ) {}
-		}
-
-		if ( b != 0 )
-		{
-			while ( true ) {}
 		}
 	}
 
@@ -395,8 +365,22 @@ int main(void)
 	SCB->SHCSR |= SCB_SHCSR_USGFAULTENA_Msk | SCB_SHCSR_BUSFAULTENA_Msk | SCB_SHCSR_MEMFAULTENA_Msk;
 	SCB->CCR &= ~(SCB_CCR_UNALIGN_TRP_Msk);
 
+	bool flip = false;
 	while ( true )
 	{
+		// TODO next, implement double buffering
+		const uint8_t bVal = ( flip ) ? 0 : 255;
+		const uint8_t rVal = ( flip ) ? 255 : 0;
+
+		for ( unsigned int byte = 0; byte < 800 * 480; byte++ )
+		{
+			sram1Ptr[(byte * 3) + 0] = bVal; // b
+			sram1Ptr[(byte * 3) + 1] = 0; // g
+			sram1Ptr[(byte * 3) + 2] = rVal; // r
+		}
+
+		flip = !flip;
+
 		// LLPD::adc_perform_conversion_sequence( EFFECT_ADC_NUM );
 		// uint16_t effect1Val = LLPD::adc_get_channel_value( EFFECT_ADC_NUM, EFFECT1_ADC_CHANNEL );
 		// uint16_t effect2Val = LLPD::adc_get_channel_value( EFFECT_ADC_NUM, EFFECT2_ADC_CHANNEL );
