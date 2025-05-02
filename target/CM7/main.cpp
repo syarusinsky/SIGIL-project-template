@@ -163,6 +163,11 @@
 #define LCD_B7_PORT 			GPIO_PORT::B
 #define LCD_B7_PIN 			GPIO_PIN::PIN_9
 
+#define FB_WIDTH 		800
+#define FB_HEIGHT 		480
+#define FB1_ADDR 		SDRAM1_MEM_START
+#define FB2_ADDR 		FB1_ADDR + ( FB_WIDTH * FB_HEIGHT * 3 )
+
 
 // these pins are unconnected on SIGIL Rev 2 development board, so we disable them as per the ST recommendations
 void disableUnusedPIns()
@@ -341,13 +346,29 @@ int main(void)
 		}
 	}
 
-	LLPD::ltdc_init( 48, 88, 40, 800, 3, 32, 13, 480, LTDC_HSYNC_POL::ACTIVE_LOW, LTDC_VSYNC_POL::ACTIVE_LOW, LTDC_DE_POL::ACTIVE_LOW,
+	// setup ltdc and double buffered framebuffer
+	LLPD::ltdc_init( 48, 88, 40, FB_WIDTH, 3, 32, 13, FB_HEIGHT, LTDC_HSYNC_POL::ACTIVE_LOW, LTDC_VSYNC_POL::ACTIVE_LOW, LTDC_DE_POL::ACTIVE_LOW,
 				LTDC_PCLK_POL::ACTIVE_LOW, 0, 0, 0 );
-	LLPD::ltdc_layer_init( LTDC_LAYER::LAYER_1, 0, 800, 0, 480, LTDC_PIXEL_FORMAT::RGB888, 255, 0, LTDC_BLEND_FACTOR1::CONSTANT_ALPHA,
-				LTDC_BLEND_FACTOR2::ONE_MINUS_CONSTANT_ALPHA, SDRAM1_MEM_START, 800, 480, 0, 0, 0 );
+	LLPD::ltdc_layer_init( LTDC_LAYER::LAYER_1, 0, FB_WIDTH, 0, FB_HEIGHT, LTDC_PIXEL_FORMAT::RGB888, 255, 0, LTDC_BLEND_FACTOR1::CONSTANT_ALPHA,
+				LTDC_BLEND_FACTOR2::ONE_MINUS_CONSTANT_ALPHA, FB1_ADDR, FB_WIDTH, FB_HEIGHT, 0, 0, 0 );
 	LLPD::ltdc_layer_enable( LTDC_LAYER::LAYER_1 );
-	LLPD::ltdc_start();
+	LLPD::ltdc_immediate_reload();
 	LLPD::gpio_output_set( LCD_BRIGHT_PORT, LCD_BRIGHT_PIN, true );
+
+	// fill framebuffers
+	uint8_t* fb1Ptr = (uint8_t*) FB1_ADDR;
+	uint8_t* fb2Ptr = (uint8_t*) FB2_ADDR;
+
+	for ( unsigned int byte = 0; byte < 800 * 480; byte++ )
+	{
+		fb1Ptr[(byte * 3) + 0] = 0; // b
+		fb1Ptr[(byte * 3) + 1] = 0; // g
+		fb1Ptr[(byte * 3) + 2] = 255; // r
+
+		fb2Ptr[(byte * 3) + 0] = 255; // b
+		fb2Ptr[(byte * 3) + 1] = 0; // g
+		fb2Ptr[(byte * 3) + 2] = 0; // r
+	}
 
 	// flush denormals
 	__set_FPSCR( __get_FPSCR() | (1 << 24) );
@@ -368,15 +389,13 @@ int main(void)
 	bool flip = false;
 	while ( true )
 	{
-		// TODO next, implement double buffering
-		const uint8_t bVal = ( flip ) ? 0 : 255;
-		const uint8_t rVal = ( flip ) ? 255 : 0;
-
-		for ( unsigned int byte = 0; byte < 800 * 480; byte++ )
+		if ( flip )
 		{
-			sram1Ptr[(byte * 3) + 0] = bVal; // b
-			sram1Ptr[(byte * 3) + 1] = 0; // g
-			sram1Ptr[(byte * 3) + 2] = rVal; // r
+			LLPD::ltdc_layer_set_fb_addr( LTDC_LAYER::LAYER_1, FB1_ADDR );
+		}
+		else
+		{
+			LLPD::ltdc_layer_set_fb_addr( LTDC_LAYER::LAYER_1, FB2_ADDR );
 		}
 
 		flip = !flip;
