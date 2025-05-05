@@ -1,3 +1,9 @@
 [submodule "lib/STM32h745bi-HAL"]
 	path = lib/STM32h745bi-HAL
 	url = https://github.com/syarusinsky/STM32h745bi-HAL.git
+[submodule "lib/SIGL"]
+	path = lib/SIGL
+	url = https://github.com/syarusinsky/SIGL.git
+[submodule "lib/SLOG"]
+	path = lib/SLOG
+	url = https://github.com/syarusinsky/SLOG.git

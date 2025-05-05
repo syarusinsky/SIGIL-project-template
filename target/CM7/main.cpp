@@ -1,4 +1,5 @@
 #include "../../lib/STM32h745bi-HAL/llpd/include/LLPD.hpp"
+#include "OutputSurface.hpp"
 
 #define SYS_CLOCK_FREQUENCY = 480000000;
 
@@ -369,6 +370,9 @@ int main(void)
 		fb2Ptr[(byte * 3) + 1] = 0; // g
 		fb2Ptr[(byte * 3) + 2] = 0; // r
 	}
+
+	// TODO need to create a constructor for this surface that puts uses the previously defined memory for framebuffers
+	OutputSurface surface;
 
 	// flush denormals
 	__set_FPSCR( __get_FPSCR() | (1 << 24) );

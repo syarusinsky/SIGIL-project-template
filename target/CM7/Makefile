@@ -14,10 +14,28 @@ DEVLIB_FILES_DIR = ../../lib/DevLib
 DEVLIB_INCLUDE_DIR = $(DEVLIB_FILES_DIR)/include
 DEVLIB_SRC_DIR = $(DEVLIB_FILES_DIR)/src
 
+# sigl files directory
+SIGL_FILES_DIR = ../../lib/SIGL
+SIGL_INCLUDE_DIR = $(SIGL_FILES_DIR)/include
+SIGL_SRC_DIR = $(SIGL_FILES_DIR)/src
+
+# slog files directory
+SLOG_FILES_DIR = ../../lib/SLOG
+SLOG_INCLUDE_DIR = $(SLOG_FILES_DIR)/include
+SLOG_SRC_DIR = $(SLOG_FILES_DIR)/src
+
+# project files directory
+PROJECT_FILES_DIR = ../..
+PROJECT_FILES_INCLUDE_DIR = $(PROJECT_FILES_DIR)/include
+PROJECT_FILES_SRC_DIR = $(PROJECT_FILES_DIR)/src
+
 # include directories
 INCLUDE =  -I$(STM32_CUBE_INCLUDE_DIR)
 INCLUDE += -I$(LLPD_INCLUDE_DIR)
 INCLUDE += -I$(DEVLIB_INCLUDE_DIR)
+INCLUDE += -I$(SIGL_INCLUDE_DIR)
+INCLUDE += -I$(SLOG_INCLUDE_DIR)
+INCLUDE += -I$(PROJECT_FILES_INCLUDE_DIR)
 
 # linker scripts
 LD_SCRIPT = $(STM32_CUBE_FILES_DIR)/ld/CM7/STM32H745BITX_FLASH.ld
@@ -48,7 +66,7 @@ ASFLAGS += -Wall
 ASFLAGS += -fmessage-length=0
 
 # c/c++ compilation directives
-CFLAGS =  -std=gnu++11
+CFLAGS =  -std=gnu++17
 CFLAGS += -mcpu=$(MCU_SPEC)
 CFLAGS += -mthumb
 CFLAGS += -mhard-float
@@ -69,6 +87,8 @@ CFLAGS += -ffunction-sections
 CFLAGS += -fdata-sections
 CFLAGS += -DCORE_CM7
 CFLAGS += -DSTM32H745xx
+CFLAGS += -DSOFTWARE_RENDERING
+CFLAGS += -DNO_GPU
 
 # linker directives.
 LSCRIPT = ./$(LD_SCRIPT)
@@ -87,6 +107,13 @@ C_SRC =  $(STM32_CUBE_FILES_DIR)/system_stm32h7xx_dualcore_boot_cm4_cm7.c
 CPP_SRC = ./main.cpp
 CPP_SRC += ./$(LLPD_SRC_DIR)/LLPD.cpp
 CPP_SRC += $(wildcard $(DEVLIB_SRC_DIR)/*.cpp)
+CPP_SRC += $(wildcard $(SIGL_SRC_DIR)/*.cpp)
+CPP_SRC += $(wildcard $(SLOG_SRC_DIR)/*.cpp)
+CPP_SRC += $(wildcard $(PROJECT_FILES_SRC_DIR)/*.cpp)
+
+# we don't want to use stdout/stderr
+CPP_SRC_TMP := $(CPP_SRC)
+CPP_SRC = $(filter-out $(SLOG_SRC_DIR)/LogMethodStd.cpp, $(CPP_SRC_TMP))
 
 RELEASE_OBJS =  $(AS_SRC:.s=_release.o)
 RELEASE_OBJS += $(C_SRC:.c=_release.o)
