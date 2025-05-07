@@ -166,8 +166,6 @@
 
 #define FB_WIDTH 		800
 #define FB_HEIGHT 		480
-#define FB1_ADDR 		SDRAM1_MEM_START
-#define FB2_ADDR 		FB1_ADDR + ( FB_WIDTH * FB_HEIGHT * 3 )
 
 
 // these pins are unconnected on SIGIL Rev 2 development board, so we disable them as per the ST recommendations
@@ -347,32 +345,28 @@ int main(void)
 		}
 	}
 
+	// fill framebuffers
+	OutputSurface surface;
+	if ( ! surface.placeGraphicsObjectsInMemory((uint8_t*) SDRAM1_MEM_START, SDRAM_SIZE) )
+	{
+		while ( true )
+		{
+			// LLPD::usart_log( LOGGING_USART_NUM, "Failed to create graphics objects! -------------------------------" );
+		}
+	}
+	surface.render();
+	surface.advanceFrameBuffer().getPixels();
+	surface.render();
+
 	// setup ltdc and double buffered framebuffer
 	LLPD::ltdc_init( 48, 88, 40, FB_WIDTH, 3, 32, 13, FB_HEIGHT, LTDC_HSYNC_POL::ACTIVE_LOW, LTDC_VSYNC_POL::ACTIVE_LOW, LTDC_DE_POL::ACTIVE_LOW,
 				LTDC_PCLK_POL::ACTIVE_LOW, 0, 0, 0 );
 	LLPD::ltdc_layer_init( LTDC_LAYER::LAYER_1, 0, FB_WIDTH, 0, FB_HEIGHT, LTDC_PIXEL_FORMAT::RGB888, 255, 0, LTDC_BLEND_FACTOR1::CONSTANT_ALPHA,
-				LTDC_BLEND_FACTOR2::ONE_MINUS_CONSTANT_ALPHA, FB1_ADDR, FB_WIDTH, FB_HEIGHT, 0, 0, 0 );
+				LTDC_BLEND_FACTOR2::ONE_MINUS_CONSTANT_ALPHA, reinterpret_cast<unsigned int>(&surface.advanceFrameBuffer().getPixels()),
+				FB_WIDTH, FB_HEIGHT, 0, 0, 0 );
 	LLPD::ltdc_layer_enable( LTDC_LAYER::LAYER_1 );
 	LLPD::ltdc_immediate_reload();
 	LLPD::gpio_output_set( LCD_BRIGHT_PORT, LCD_BRIGHT_PIN, true );
-
-	// fill framebuffers
-	uint8_t* fb1Ptr = (uint8_t*) FB1_ADDR;
-	uint8_t* fb2Ptr = (uint8_t*) FB2_ADDR;
-
-	for ( unsigned int byte = 0; byte < 800 * 480; byte++ )
-	{
-		fb1Ptr[(byte * 3) + 0] = 0; // b
-		fb1Ptr[(byte * 3) + 1] = 0; // g
-		fb1Ptr[(byte * 3) + 2] = 255; // r
-
-		fb2Ptr[(byte * 3) + 0] = 255; // b
-		fb2Ptr[(byte * 3) + 1] = 0; // g
-		fb2Ptr[(byte * 3) + 2] = 0; // r
-	}
-
-	// TODO need to create a constructor for this surface that puts uses the previously defined memory for framebuffers
-	OutputSurface surface;
 
 	// flush denormals
 	__set_FPSCR( __get_FPSCR() | (1 << 24) );
@@ -390,19 +384,10 @@ int main(void)
 	SCB->SHCSR |= SCB_SHCSR_USGFAULTENA_Msk | SCB_SHCSR_BUSFAULTENA_Msk | SCB_SHCSR_MEMFAULTENA_Msk;
 	SCB->CCR &= ~(SCB_CCR_UNALIGN_TRP_Msk);
 
-	bool flip = false;
 	while ( true )
 	{
-		if ( flip )
-		{
-			LLPD::ltdc_layer_set_fb_addr( LTDC_LAYER::LAYER_1, FB1_ADDR );
-		}
-		else
-		{
-			LLPD::ltdc_layer_set_fb_addr( LTDC_LAYER::LAYER_1, FB2_ADDR );
-		}
-
-		flip = !flip;
+		surface.render();
+		LLPD::ltdc_layer_set_fb_addr( LTDC_LAYER::LAYER_1, reinterpret_cast<unsigned int>(&surface.advanceFrameBuffer().getPixels()) );
 
 		// LLPD::adc_perform_conversion_sequence( EFFECT_ADC_NUM );
 		// uint16_t effect1Val = LLPD::adc_get_channel_value( EFFECT_ADC_NUM, EFFECT1_ADC_CHANNEL );
