@@ -26,21 +26,9 @@ OutputSurface::~OutputSurface()
 
 void OutputSurface::draw (Graphics<WIDTH, HEIGHT, THIS_COLOR_FORMAT, THIS_RENDER_API, ENABLE_3D, SHADER_PASS_DATA_SIZE>* graphics)
 {
-	static bool flip = false;
 	static unsigned int counter = 0;
 
-	if ( flip )
-	{
-		graphics->setColor( 0.0f, 0.0f, 1.0f );
-	}
-	else
-	{
-		graphics->setColor( 1.0f, 0.0f, 0.0f );
-	}
-
-	flip = !flip;
-	counter++;
-
+	graphics->setColor( 0.0f, 0.0f, 0.0f );
 	graphics->fill();
 
 	std::array<Texture<CP_FORMAT::RGBA_32BIT, THIS_RENDER_API>*, 5> texArray1 = { m_BoxTex };
@@ -87,8 +75,9 @@ void OutputSurface::draw (Graphics<WIDTH, HEIGHT, THIS_COLOR_FORMAT, THIS_RENDER
 		xRotationIncr = -xRotationIncr;
 	}
 
+	counter++;
 	std::string counterString = "Counter: " + std::to_string(counter);
-	graphics->setColor( 0.0f, 0.0f, 0.0f );
+	graphics->setColor( 1.0f, 1.0f, 1.0f );
 	graphics->drawText( 0.0f, 0.0f, counterString.c_str(), 2.0f );
 }
 

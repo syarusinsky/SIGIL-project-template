@@ -6,7 +6,7 @@
 // adjust for your own screen resolution
 #define WIDTH 			800
 #define HEIGHT 			480
-#define THIS_COLOR_FORMAT 	CP_FORMAT::RGB_24BIT
+#define THIS_COLOR_FORMAT 	CP_FORMAT::BGR_24BIT
 #define THIS_RENDER_API 	RENDER_API::SOFTWARE
 #define NUM_THREADS 		1
 #define ENABLE_3D 		true
