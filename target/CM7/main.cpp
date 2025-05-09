@@ -1,5 +1,7 @@
 #include "../../lib/STM32h745bi-HAL/llpd/include/LLPD.hpp"
 #include "OutputSurface.hpp"
+#include "Smoll.h"
+#include "boxTex.h"
 
 #define SYS_CLOCK_FREQUENCY = 480000000;
 
@@ -306,9 +308,9 @@ int main(void)
 	MPU->RASR = 	0 			 	<< 	MPU_RASR_XN_Pos 	|
 			ARM_MPU_AP_FULL 	 	<< 	MPU_RASR_AP_Pos 	|
 			1 			 	<< 	MPU_RASR_TEX_Pos 	|
-			0 			 	<< 	MPU_RASR_S_Pos 		|
-			0 			 	<< 	MPU_RASR_C_Pos 		| // TODO maybe setting cachable will be faster?
-			0 			 	<< 	MPU_RASR_B_Pos 		|
+			1 			 	<< 	MPU_RASR_S_Pos 		|
+			1 			 	<< 	MPU_RASR_C_Pos 		| // TODO maybe setting cachable will be faster?
+			1 			 	<< 	MPU_RASR_B_Pos 		|
 			0 			 	<< 	MPU_RASR_SRD_Pos 	|
 			ARM_MPU_REGION_SIZE_8MB 	<< 	MPU_RASR_SIZE_Pos 	|
 			1 				<< 	MPU_RASR_ENABLE_Pos;
@@ -354,6 +356,10 @@ int main(void)
 			// LLPD::usart_log( LOGGING_USART_NUM, "Failed to create graphics objects! -------------------------------" );
 		}
 	}
+	Font font( Smoll_data );
+	Texture<CP_FORMAT::RGBA_32BIT, RENDER_API::SOFTWARE> boxTex( boxTex_data );
+	surface.setBoxTex( &boxTex );
+	surface.setFont( &font );
 	surface.render();
 	surface.advanceFrameBuffer().getPixels();
 	surface.render();
@@ -422,6 +428,8 @@ extern "C" void HardFault_Handler (void)
 	{
 		volatile uint32_t cfsrReg = SCB->CFSR;
 		SCB->CFSR = cfsrReg;
+		volatile uint32_t bfarReg = SCB->BFAR;
+		SCB->BFAR = bfarReg;
 		// LLPD::usart_log( LOGGING_USART_NUM, "Hard Faulting -----------------------------" );
 	}
 }
