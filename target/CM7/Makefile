@@ -130,17 +130,18 @@ release: $(TARGET)_release.bin
 	$(CC) -x assembler-with-cpp $(ASFLAGS) $< -o $@
 
 %_release.o: %.c
-	$(CC) -c -g -O2 $(CFLAGS) $(INCLUDE) $< -o $@
+	$(CC) -c -g -O3 $(CFLAGS) $(INCLUDE) $< -o $@
 
 %_release.o: %.cpp
-	$(CC) -c -g -O2 $(CFLAGS) $(INCLUDE) $< -o $@
+	$(CC) -c -g -O3 $(CFLAGS) $(INCLUDE) $< -o $@
 
 $(TARGET)_release.elf: $(RELEASE_OBJS)
-	$(CC) $^ $(LFLAGS) -O2 -o $@
+	$(CC) $^ $(LFLAGS) -O3 -o $@
 
 $(TARGET)_release.bin: $(TARGET)_release.elf
 	$(OC) -S -O binary $< $@
 	$(OS) $<
+	$(OD) -h -S $< > $(TARGET)_release.list
 
 .PHONY: debug
 debug: $(TARGET)_debug.bin
@@ -160,6 +161,7 @@ $(TARGET)_debug.elf: $(DEBUG_OBJS)
 $(TARGET)_debug.bin: $(TARGET)_debug.elf
 	$(OC) -S -O binary $< $@
 	$(OS) $<
+	$(OD) -h -S $< > $(TARGET)_debug.list
 
 .PHONY: clean
 clean:
@@ -167,5 +169,7 @@ clean:
 	rm -f $(DEBUG_OBJS)
 	rm -f $(TARGET)_release.elf
 	rm -f $(TARGET)_release.bin
+	rm -f $(TARGET)_release.list
 	rm -f $(TARGET)_debug.elf
 	rm -f $(TARGET)_debug.bin
+	rm -f $(TARGET)_debug.list
