@@ -166,8 +166,8 @@
 #define LCD_B7_PORT 			GPIO_PORT::B
 #define LCD_B7_PIN 			GPIO_PIN::PIN_9
 
-#define FB_WIDTH 		800
-#define FB_HEIGHT 		480
+#define DISPLAY_WIDTH 		800
+#define DISPLAY_HEIGHT 		480
 
 
 // these pins are unconnected on SIGIL Rev 2 development board, so we disable them as per the ST recommendations
@@ -365,11 +365,12 @@ int main(void)
 	surface.render();
 
 	// setup ltdc and double buffered framebuffer
-	LLPD::ltdc_init( 48, 88, 40, FB_WIDTH, 3, 32, 13, FB_HEIGHT, LTDC_HSYNC_POL::ACTIVE_LOW, LTDC_VSYNC_POL::ACTIVE_LOW, LTDC_DE_POL::ACTIVE_LOW,
-				LTDC_PCLK_POL::ACTIVE_LOW, 0, 0, 0 );
-	LLPD::ltdc_layer_init( LTDC_LAYER::LAYER_1, 0, FB_WIDTH, 0, FB_HEIGHT, LTDC_PIXEL_FORMAT::RGB888, 255, 0, LTDC_BLEND_FACTOR1::CONSTANT_ALPHA,
-				LTDC_BLEND_FACTOR2::ONE_MINUS_CONSTANT_ALPHA, reinterpret_cast<unsigned int>(&surface.advanceFrameBuffer().getPixels()),
-				FB_WIDTH, FB_HEIGHT, 0, 0, 0 );
+	LLPD::ltdc_init( 48, 88, 40, DISPLAY_WIDTH, 3, 32, 13, DISPLAY_HEIGHT, LTDC_HSYNC_POL::ACTIVE_LOW, LTDC_VSYNC_POL::ACTIVE_LOW,
+				LTDC_DE_POL::ACTIVE_LOW, LTDC_PCLK_POL::ACTIVE_LOW, 0, 0, 0 );
+	LLPD::ltdc_layer_init( LTDC_LAYER::LAYER_1, 0, surface.getWidth(), 0, surface.getHeight(), LTDC_PIXEL_FORMAT::RGB888, 255, 0,
+				LTDC_BLEND_FACTOR1::CONSTANT_ALPHA, LTDC_BLEND_FACTOR2::ONE_MINUS_CONSTANT_ALPHA,
+				reinterpret_cast<unsigned int>(&surface.advanceFrameBuffer().getPixels()), surface.getWidth(),
+				surface.getHeight(), 0, 0, 0 );
 	LLPD::ltdc_layer_enable( LTDC_LAYER::LAYER_1 );
 	LLPD::ltdc_immediate_reload();
 	LLPD::gpio_output_set( LCD_BRIGHT_PORT, LCD_BRIGHT_PIN, true );
@@ -392,6 +393,9 @@ int main(void)
 
 	while ( true )
 	{
+		// TODO needs a shit ton of optimization, first create method for getting fps, then max SDRAM speed, then optimize mpu after
+		// reading an4838, then optimize fill, then move font and texture memory from ITCM to DTCM (first check if this will even make
+		// a difference?), then optimize other drawing methods, finally, see if there's a way to do image scaling with LTDC
 		surface.render();
 		LLPD::ltdc_layer_set_fb_addr( LTDC_LAYER::LAYER_1, reinterpret_cast<unsigned int>(&surface.advanceFrameBuffer().getPixels()) );
 
