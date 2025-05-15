@@ -20,6 +20,8 @@ class OutputSurface : public Surface<THIS_RENDER_API, WIDTH, HEIGHT, THIS_COLOR_
 		OutputSurface();
 		~OutputSurface();
 
+		void setCurrentFPS (unsigned int fps) { m_CurrentFPS = fps; }
+
 		void draw (Graphics<WIDTH, HEIGHT, THIS_COLOR_FORMAT, THIS_RENDER_API, ENABLE_3D, SHADER_PASS_DATA_SIZE>* graphics) override;
 
 		void setBoxTex (Texture<CP_FORMAT::RGBA_32BIT, THIS_RENDER_API>* boxTex);
@@ -31,6 +33,7 @@ class OutputSurface : public Surface<THIS_RENDER_API, WIDTH, HEIGHT, THIS_COLOR_
 	private:
 		Mesh 							m_BoxMesh;
 		Texture<CP_FORMAT::RGBA_32BIT, THIS_RENDER_API>* 	m_BoxTex;
+		unsigned int 						m_CurrentFPS;
 
 		void (*m_VShader) (TriShaderData<CP_FORMAT::RGBA_32BIT, THIS_RENDER_API, SHADER_PASS_DATA_SIZE>& vShaderData);
 		void (*m_FShader) (Color& colorOut, TriShaderData<CP_FORMAT::RGBA_32BIT, THIS_RENDER_API, SHADER_PASS_DATA_SIZE>& fShaderData,

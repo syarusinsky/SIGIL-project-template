@@ -3,6 +3,7 @@
 #include <string>
 
 OutputSurface::OutputSurface() :
+	m_CurrentFPS( 0 ),
 	m_VShader( vShader ),
 	m_FShader( fShader )
 {
@@ -26,8 +27,6 @@ OutputSurface::~OutputSurface()
 
 void OutputSurface::draw (Graphics<WIDTH, HEIGHT, THIS_COLOR_FORMAT, THIS_RENDER_API, ENABLE_3D, SHADER_PASS_DATA_SIZE>* graphics)
 {
-	static unsigned int counter = 0;
-
 	graphics->setColor( 0.0f, 0.0f, 0.0f );
 	graphics->fill();
 
@@ -75,8 +74,7 @@ void OutputSurface::draw (Graphics<WIDTH, HEIGHT, THIS_COLOR_FORMAT, THIS_RENDER
 		xRotationIncr = -xRotationIncr;
 	}
 
-	counter++;
-	std::string counterString = "Counter: " + std::to_string(counter);
+	std::string counterString = "FPS: " + std::to_string( m_CurrentFPS );
 	graphics->setColor( 1.0f, 1.0f, 1.0f );
 	graphics->drawText( 0.0f, 0.0f, counterString.c_str(), 2.0f );
 }

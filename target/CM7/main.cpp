@@ -169,6 +169,7 @@
 #define DISPLAY_WIDTH 		800
 #define DISPLAY_HEIGHT 		480
 
+volatile float elapsedUSeconds = 0.0f;
 
 // these pins are unconnected on SIGIL Rev 2 development board, so we disable them as per the ST recommendations
 void disableUnusedPIns()
@@ -279,6 +280,8 @@ int main(void)
 
 	// timer setup (for 30 kHz sampling rate at 480 MHz / 2 timer clock)
 	LLPD::tim6_counter_setup( 0, 8000, 30000 );
+	LLPD::tim6_counter_enable_interrupts();
+	LLPD::tim6_counter_start();
 
 	// adc setup (note this must be done after the tim6_counter_start() call since it uses the delay funtion)
 	// LLPD::gpio_analog_setup( EFFECT_ADC_PORT, EFFECT1_ADC_PIN );
@@ -393,9 +396,11 @@ int main(void)
 
 	while ( true )
 	{
-		// TODO needs a shit ton of optimization, first create method for getting fps, then max SDRAM speed, then optimize mpu after
+		// TODO needs a shit ton of optimization, first max SDRAM speed, then optimize mpu after
 		// reading an4838, then optimize fill, then move font and texture memory from ITCM to DTCM (first check if this will even make
 		// a difference?), then optimize other drawing methods, finally, see if there's a way to do image scaling with LTDC
+		surface.setCurrentFPS( static_cast<unsigned int>(elapsedUSeconds / 1000000.0f) );
+		elapsedUSeconds = 0.0f;
 		surface.render();
 		LLPD::ltdc_layer_set_fb_addr( LTDC_LAYER::LAYER_1, reinterpret_cast<unsigned int>(&surface.advanceFrameBuffer().getPixels()) );
 
@@ -417,6 +422,16 @@ int main(void)
 		// 	LLPD::usart_log( LOGGING_USART_NUM, "BUTTON 2 PRESSED" );
 		// }
 	}
+}
+
+extern "C" void TIM6_DAC_IRQHandler (void)
+{
+	if ( ! LLPD::tim6_isr_handle_delay() ) // if not currently in a delay function,...
+	{
+		elapsedUSeconds += LLPD::tim6_get_usecond_incr();
+	}
+
+	LLPD::tim6_counter_clear_interrupt_flag();
 }
 
 extern "C" void USART2_IRQHandler (void) // logging usart
