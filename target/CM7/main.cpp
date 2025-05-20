@@ -399,7 +399,7 @@ int main(void)
 		// TODO needs a shit ton of optimization, first max SDRAM speed, then optimize mpu after
 		// reading an4838, then optimize fill, then move font and texture memory from ITCM to DTCM (first check if this will even make
 		// a difference?), then optimize other drawing methods, finally, see if there's a way to do image scaling with LTDC
-		surface.setCurrentFPS( static_cast<unsigned int>(elapsedUSeconds / 1000000.0f) );
+		surface.setCurrentFPS( static_cast<unsigned int>(1000000.0f / elapsedUSeconds) );
 		elapsedUSeconds = 0.0f;
 		surface.render();
 		LLPD::ltdc_layer_set_fb_addr( LTDC_LAYER::LAYER_1, reinterpret_cast<unsigned int>(&surface.advanceFrameBuffer().getPixels()) );
