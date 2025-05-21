@@ -299,8 +299,8 @@ int main(void)
 	// LLPD::gpio_digital_input_setup( EFFECT_BUTTON_PORT, EFFECT1_BUTTON_PIN, GPIO_PUPD::PULL_UP );
 	// LLPD::gpio_digital_input_setup( EFFECT_BUTTON_PORT, EFFECT2_BUTTON_PIN, GPIO_PUPD::PULL_UP );
 
-	// setup mpu for sdram region to prevent unaligned access
-	// TODO in the future, test this with "cachable" and see if it makes a difference
+	// setup mpu for sdram regions to prevent unaligned access
+	// TODO these are the current fastest settings, but explore rasr settings again in the future, use an4838 as reference
 	// disable mpu
 	__DMB();
 	SCB->SHCSR &= ~SCB_SHCSR_MEMFAULTENA_Msk;
@@ -310,10 +310,31 @@ int main(void)
 	MPU->RBAR = SDRAM1_MEM_START;
 	MPU->RASR = 	0 			 	<< 	MPU_RASR_XN_Pos 	|
 			ARM_MPU_AP_FULL 	 	<< 	MPU_RASR_AP_Pos 	|
-			1 			 	<< 	MPU_RASR_TEX_Pos 	|
-			1 			 	<< 	MPU_RASR_S_Pos 		|
-			1 			 	<< 	MPU_RASR_C_Pos 		| // TODO maybe setting cachable will be faster?
-			1 			 	<< 	MPU_RASR_B_Pos 		|
+			0 			 	<< 	MPU_RASR_TEX_Pos 	|
+			0 			 	<< 	MPU_RASR_S_Pos 		|
+			1 			 	<< 	MPU_RASR_C_Pos 		|
+			0 			 	<< 	MPU_RASR_B_Pos 		|
+			0 			 	<< 	MPU_RASR_SRD_Pos 	|
+			ARM_MPU_REGION_SIZE_8MB 	<< 	MPU_RASR_SIZE_Pos 	|
+			1 				<< 	MPU_RASR_ENABLE_Pos;
+	// enable mpu
+	MPU->CTRL = MPU_CTRL_PRIVDEFENA_Msk | MPU_CTRL_ENABLE_Msk;
+	SCB->SHCSR |= SCB_SHCSR_MEMFAULTENA_Msk;
+	__DSB();
+	__ISB();
+	// disable mpu
+	__DMB();
+	SCB->SHCSR &= ~SCB_SHCSR_MEMFAULTENA_Msk;
+	MPU->CTRL = 0;
+	// region config for sdram as non-cacheable
+	MPU->RNR = 1;
+	MPU->RBAR = SDRAM2_MEM_START;
+	MPU->RASR = 	0 			 	<< 	MPU_RASR_XN_Pos 	|
+			ARM_MPU_AP_FULL 	 	<< 	MPU_RASR_AP_Pos 	|
+			0 			 	<< 	MPU_RASR_TEX_Pos 	|
+			0 			 	<< 	MPU_RASR_S_Pos 		|
+			1 			 	<< 	MPU_RASR_C_Pos 		|
+			0 			 	<< 	MPU_RASR_B_Pos 		|
 			0 			 	<< 	MPU_RASR_SRD_Pos 	|
 			ARM_MPU_REGION_SIZE_8MB 	<< 	MPU_RASR_SIZE_Pos 	|
 			1 				<< 	MPU_RASR_ENABLE_Pos;
@@ -352,7 +373,7 @@ int main(void)
 
 	// fill framebuffers
 	OutputSurface surface;
-	if ( ! surface.placeGraphicsObjectsInMemory((uint8_t*) SDRAM1_MEM_START, SDRAM_SIZE) )
+	if ( ! surface.placeGraphicsObjectsInMemory((uint8_t*) SDRAM2_MEM_START, SDRAM_SIZE) )
 	{
 		while ( true )
 		{
@@ -384,7 +405,7 @@ int main(void)
 	// enable instruction cache
 	SCB_EnableICache();
 
-	// enable data cache (will only be useful for constant values stored in flash)
+	// enable data cache
 	SCB_InvalidateDCache();
 	SCB_EnableDCache();
 
@@ -396,9 +417,9 @@ int main(void)
 
 	while ( true )
 	{
-		// TODO needs a shit ton of optimization, first max SDRAM speed, then optimize mpu after
-		// reading an4838, then optimize fill, then move font and texture memory from ITCM to DTCM (first check if this will even make
-		// a difference?), then optimize other drawing methods, finally, see if there's a way to do image scaling with LTDC
+		// TODO needs a shit ton of optimization, first optimize fill, then move font and texture memory from ITCM to DTCM and make
+		// sure we're using DTCM for ram and test ITCM for instructions, then optimize other drawing methods, finally, see if there's
+		// a way to do image scaling with LTDC
 		surface.setCurrentFPS( static_cast<unsigned int>(1000000.0f / elapsedUSeconds) );
 		elapsedUSeconds = 0.0f;
 		surface.render();
