@@ -417,9 +417,8 @@ int main(void)
 
 	while ( true )
 	{
-		// TODO needs a shit ton of optimization, first optimize fill, then move font and texture memory from ITCM to DTCM and make
-		// sure we're using DTCM for ram and test ITCM for instructions, then optimize other drawing methods, finally, see if there's
-		// a way to do image scaling with LTDC
+		// TODO needs a shit ton of optimization, first optimize other drawing methods, finally, see if there's a way to do image scaling
+		// with LTDC
 		surface.setCurrentFPS( static_cast<unsigned int>(1000000.0f / elapsedUSeconds) );
 		elapsedUSeconds = 0.0f;
 		surface.render();
