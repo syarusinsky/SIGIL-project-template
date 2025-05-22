@@ -299,8 +299,7 @@ int main(void)
 	// LLPD::gpio_digital_input_setup( EFFECT_BUTTON_PORT, EFFECT1_BUTTON_PIN, GPIO_PUPD::PULL_UP );
 	// LLPD::gpio_digital_input_setup( EFFECT_BUTTON_PORT, EFFECT2_BUTTON_PIN, GPIO_PUPD::PULL_UP );
 
-	// setup mpu for sdram regions to prevent unaligned access
-	// TODO these are the current fastest settings, but explore rasr settings again in the future, use an4838 as reference
+	// setup mpu for sdram regions to prevent unaligned access and set write-back with read/write allocate cache policy
 	// disable mpu
 	__DMB();
 	SCB->SHCSR &= ~SCB_SHCSR_MEMFAULTENA_Msk;
@@ -310,10 +309,10 @@ int main(void)
 	MPU->RBAR = SDRAM1_MEM_START;
 	MPU->RASR = 	0 			 	<< 	MPU_RASR_XN_Pos 	|
 			ARM_MPU_AP_FULL 	 	<< 	MPU_RASR_AP_Pos 	|
-			0 			 	<< 	MPU_RASR_TEX_Pos 	|
+			0b001 			 	<< 	MPU_RASR_TEX_Pos 	|
 			0 			 	<< 	MPU_RASR_S_Pos 		|
 			1 			 	<< 	MPU_RASR_C_Pos 		|
-			0 			 	<< 	MPU_RASR_B_Pos 		|
+			1 			 	<< 	MPU_RASR_B_Pos 		|
 			0 			 	<< 	MPU_RASR_SRD_Pos 	|
 			ARM_MPU_REGION_SIZE_8MB 	<< 	MPU_RASR_SIZE_Pos 	|
 			1 				<< 	MPU_RASR_ENABLE_Pos;
@@ -331,10 +330,10 @@ int main(void)
 	MPU->RBAR = SDRAM2_MEM_START;
 	MPU->RASR = 	0 			 	<< 	MPU_RASR_XN_Pos 	|
 			ARM_MPU_AP_FULL 	 	<< 	MPU_RASR_AP_Pos 	|
-			0 			 	<< 	MPU_RASR_TEX_Pos 	|
+			0b001 			 	<< 	MPU_RASR_TEX_Pos 	|
 			0 			 	<< 	MPU_RASR_S_Pos 		|
 			1 			 	<< 	MPU_RASR_C_Pos 		|
-			0 			 	<< 	MPU_RASR_B_Pos 		|
+			1 			 	<< 	MPU_RASR_B_Pos 		|
 			0 			 	<< 	MPU_RASR_SRD_Pos 	|
 			ARM_MPU_REGION_SIZE_8MB 	<< 	MPU_RASR_SIZE_Pos 	|
 			1 				<< 	MPU_RASR_ENABLE_Pos;
@@ -389,12 +388,13 @@ int main(void)
 	surface.render();
 
 	// setup ltdc and double buffered framebuffer
+	const unsigned int fbWidth = surface.getWidth();
+	const unsigned int fbHeight = surface.getHeight();
 	LLPD::ltdc_init( 48, 88, 40, DISPLAY_WIDTH, 3, 32, 13, DISPLAY_HEIGHT, LTDC_HSYNC_POL::ACTIVE_LOW, LTDC_VSYNC_POL::ACTIVE_LOW,
 				LTDC_DE_POL::ACTIVE_LOW, LTDC_PCLK_POL::ACTIVE_LOW, 0, 0, 0 );
 	LLPD::ltdc_layer_init( LTDC_LAYER::LAYER_1, 0, surface.getWidth(), 0, surface.getHeight(), LTDC_PIXEL_FORMAT::RGB888, 255, 0,
 				LTDC_BLEND_FACTOR1::CONSTANT_ALPHA, LTDC_BLEND_FACTOR2::ONE_MINUS_CONSTANT_ALPHA,
-				reinterpret_cast<unsigned int>(&surface.advanceFrameBuffer().getPixels()), surface.getWidth(),
-				surface.getHeight(), 0, 0, 0 );
+				reinterpret_cast<unsigned int>(&surface.advanceFrameBuffer().getPixels()), fbWidth, fbHeight, 0, 0, 0 );
 	LLPD::ltdc_layer_enable( LTDC_LAYER::LAYER_1 );
 	LLPD::ltdc_immediate_reload();
 	LLPD::gpio_output_set( LCD_BRIGHT_PORT, LCD_BRIGHT_PIN, true );
@@ -417,12 +417,15 @@ int main(void)
 
 	while ( true )
 	{
-		// TODO needs a shit ton of optimization, first optimize other drawing methods, finally, see if there's a way to do image scaling
-		// with LTDC
+		// TODO needs a shit ton of optimization, first look at cache policies again (write-back with write-allocate should be fastest)
+		// and retest DTCMRAM stuff, then optimize other drawing methods, finally, see if there's a way to do image scaling with LTDC
 		surface.setCurrentFPS( static_cast<unsigned int>(1000000.0f / elapsedUSeconds) );
 		elapsedUSeconds = 0.0f;
 		surface.render();
-		LLPD::ltdc_layer_set_fb_addr( LTDC_LAYER::LAYER_1, reinterpret_cast<unsigned int>(&surface.advanceFrameBuffer().getPixels()) );
+		// need SCB_CleanDCache_by_Addr to solve cache coherency issues
+		const unsigned int fbAddr = reinterpret_cast<unsigned int>(&surface.advanceFrameBuffer().getPixels());
+		SCB_CleanDCache_by_Addr( (uint32_t*)fbAddr, fbWidth * fbHeight * 3 );
+		LLPD::ltdc_layer_set_fb_addr( LTDC_LAYER::LAYER_1, fbAddr );
 
 		// LLPD::adc_perform_conversion_sequence( EFFECT_ADC_NUM );
 		// uint16_t effect1Val = LLPD::adc_get_channel_value( EFFECT_ADC_NUM, EFFECT1_ADC_CHANNEL );
