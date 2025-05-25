@@ -417,8 +417,7 @@ int main(void)
 
 	while ( true )
 	{
-		// TODO needs a shit ton of optimization, first look at cache policies again (write-back with write-allocate should be fastest)
-		// and retest DTCMRAM stuff, then optimize other drawing methods, finally, see if there's a way to do image scaling with LTDC
+		// TODO needs optimization, first optimize other drawing methods, then try LTDC CLUT
 		surface.setCurrentFPS( static_cast<unsigned int>(1000000.0f / elapsedUSeconds) );
 		elapsedUSeconds = 0.0f;
 		surface.render();
