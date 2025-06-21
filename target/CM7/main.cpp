@@ -370,6 +370,10 @@ int main(void)
 		}
 	}
 
+	// initialize sd card
+	LLPD::sdmmc_init( GPIO_PORT::A, GPIO_PIN::PIN_4, SDRAM_FREQ * 2 * 1000000, 25000000, SDMMC_DIRPOL::LOW, SDMMC_BUS_WIDTH::BITS_4,
+				false, false, SDMMC_CLK_EDGE::FALLING );
+
 	// fill framebuffers
 	OutputSurface surface;
 	if ( ! surface.placeGraphicsObjectsInMemory((uint8_t*) SDRAM2_MEM_START, SDRAM_SIZE) )

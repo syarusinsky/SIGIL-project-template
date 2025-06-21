@@ -35,9 +35,9 @@ void OutputSurface::draw (Graphics<WIDTH, HEIGHT, THIS_COLOR_FORMAT, THIS_RENDER
 	Camera3D camera( 0.01f, 1000.0f, 60.0f, aspectRatio );
 	Mesh boxMesh = m_BoxMesh;
 	boxMesh.transformMat = generateIdentityMatrix();
-	static float xTranslate = 50.0f;
+	static float xTranslate = 0.0f;
 	static float xTranslateIncr = 0.1f;
-	static float xRotation = 180.0f;
+	static float xRotation = 0.0f;
 	static float xRotationIncr = 1.0f;
 	TriShaderData<CP_FORMAT::RGBA_32BIT, THIS_RENDER_API, SHADER_PASS_DATA_SIZE> shaderData
 	{
