@@ -371,8 +371,14 @@ int main(void)
 	}
 
 	// initialize sd card
-	LLPD::sdmmc_init( GPIO_PORT::A, GPIO_PIN::PIN_4, SDRAM_FREQ * 2 * 1000000, 25000000, SDMMC_DIRPOL::LOW, SDMMC_BUS_WIDTH::BITS_4,
-				false, false, SDMMC_CLK_EDGE::FALLING );
+	if ( ! LLPD::sdmmc_init(GPIO_PORT::A, GPIO_PIN::PIN_4, SDRAM_FREQ * 2 * 1000000, 25000000, SDMMC_DIRPOL::LOW, SDMMC_BUS_WIDTH::BITS_4,
+				false, false, SDMMC_CLK_EDGE::FALLING) )
+	{
+		while ( true )
+		{
+			// LLPD::usart_log( LOGGING_USART_NUM, "Failed to initialize sd card! -------------------------------" );
+		}
+	}
 
 	// fill framebuffers
 	OutputSurface surface;
