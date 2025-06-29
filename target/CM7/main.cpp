@@ -371,7 +371,7 @@ int main(void)
 	}
 
 	// initialize sd card
-	if ( ! LLPD::sdmmc_init(GPIO_PORT::A, GPIO_PIN::PIN_4, SDRAM_FREQ * 2 * 1000000, 25000000, SDMMC_DIRPOL::LOW, SDMMC_BUS_WIDTH::BITS_4,
+	if ( ! LLPD::sdmmc_init(GPIO_PORT::A, GPIO_PIN::PIN_4, SDRAM_FREQ * 2 * 1000000, 25000000, SDMMC_BUS_WIDTH::BITS_4,
 				false, false, SDMMC_CLK_EDGE::FALLING) )
 	{
 		while ( true )
