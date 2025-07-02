@@ -380,6 +380,153 @@ int main(void)
 		}
 	}
 
+	// test erasing, reading, and writing single, and multiple blocks
+	uint8_t* testDataPtr = (uint8_t*) D1_AXISRAM_BASE;
+	if ( ! LLPD::sdmmc_erase(50, 1) )
+	{
+		while ( true )
+		{
+			// LLPD::usart_log( LOGGING_USART_NUM, "Failed to erase single block sd card! -------------------------------" );
+		}
+	}
+	if ( ! LLPD::sdmmc_read_dma(50, testDataPtr, 1) )
+	{
+		while ( true )
+		{
+			// LLPD::usart_log( LOGGING_USART_NUM, "Failed to read single blocks sd card! -------------------------------" );
+		}
+	}
+	if ( LLPD::sdmmc_has_transfer_error() )
+	{
+		while ( true )
+		{
+			// LLPD::usart_log( LOGGING_USART_NUM, "Failed to transfer single blocks sd card! -------------------------------" );
+		}
+	}
+	for ( unsigned int byte = 0; byte < 512; byte++ )
+	{
+		if ( testDataPtr[byte] != 0 )
+		{
+			while ( true )
+			{
+				// LLPD::usart_log( LOGGING_USART_NUM, "Failed to read correct values sd card! -------------------------------" );
+			}
+		}
+		testDataPtr[byte] = (231 + byte) % 255;
+	}
+	if ( ! LLPD::sdmmc_write_dma(50, testDataPtr, 1) )
+	{
+		while ( true )
+		{
+			// LLPD::usart_log( LOGGING_USART_NUM, "Failed to write single blocks sd card! -------------------------------" );
+		}
+	}
+	if ( LLPD::sdmmc_has_transfer_error() )
+	{
+		while ( true )
+		{
+			// LLPD::usart_log( LOGGING_USART_NUM, "Failed to transfer single blocks sd card! -------------------------------" );
+		}
+	}
+	for ( unsigned int byte = 0; byte < 512; byte++ )
+	{
+		testDataPtr[byte] = 0;
+	}
+	if ( ! LLPD::sdmmc_read_dma(50, testDataPtr, 1) )
+	{
+		while ( true )
+		{
+			// LLPD::usart_log( LOGGING_USART_NUM, "Failed to read single blocks sd card! -------------------------------" );
+		}
+	}
+	if ( LLPD::sdmmc_has_transfer_error() )
+	{
+		while ( true )
+		{
+			// LLPD::usart_log( LOGGING_USART_NUM, "Failed to transfer single blocks sd card! -------------------------------" );
+		}
+	}
+	for ( unsigned int byte = 0; byte < 512; byte++ )
+	{
+		if ( testDataPtr[byte] != (231 + byte) % 255 )
+		{
+			while ( true )
+			{
+				// LLPD::usart_log( LOGGING_USART_NUM, "Failed to read correct values sd card! -------------------------------" );
+			}
+		}
+	}
+	if ( ! LLPD::sdmmc_erase(50, 4) )
+	{
+		while ( true )
+		{
+			// LLPD::usart_log( LOGGING_USART_NUM, "Failed to erase multiple block sd card! -------------------------------" );
+		}
+	}
+	if ( ! LLPD::sdmmc_read_dma(50, testDataPtr, 4) )
+	{
+		while ( true )
+		{
+			// LLPD::usart_log( LOGGING_USART_NUM, "Failed to read multiple blocks sd card! -------------------------------" );
+		}
+	}
+	if ( LLPD::sdmmc_has_transfer_error() )
+	{
+		while ( true )
+		{
+			// LLPD::usart_log( LOGGING_USART_NUM, "Failed to transfer multiple blocks sd card! -------------------------------" );
+		}
+	}
+	for ( unsigned int byte = 0; byte < 512 * 4; byte++ )
+	{
+		if ( testDataPtr[byte] != 0 )
+		{
+			while ( true )
+			{
+				// LLPD::usart_log( LOGGING_USART_NUM, "Failed to read correct values sd card! -------------------------------" );
+			}
+		}
+		testDataPtr[byte] = (231 + byte) % 255;
+	}
+	if ( ! LLPD::sdmmc_write_dma(50, testDataPtr, 4) )
+	{
+		while ( true )
+		{
+			// LLPD::usart_log( LOGGING_USART_NUM, "Failed to write multiple blocks sd card! -------------------------------" );
+		}
+	}
+	if ( LLPD::sdmmc_has_transfer_error() )
+	{
+		while ( true )
+		{
+			// LLPD::usart_log( LOGGING_USART_NUM, "Failed to transfer multiple blocks sd card! -------------------------------" );
+		}
+	}
+	if ( ! LLPD::sdmmc_read_dma(50, testDataPtr, 4) )
+	{
+		while ( true )
+		{
+			// LLPD::usart_log( LOGGING_USART_NUM, "Failed to read multiple blocks sd card! -------------------------------" );
+		}
+	}
+	if ( LLPD::sdmmc_has_transfer_error() )
+	{
+		while ( true )
+		{
+			// LLPD::usart_log( LOGGING_USART_NUM, "Failed to transfer multiple blocks sd card! -------------------------------" );
+		}
+	}
+	for ( unsigned int byte = 0; byte < 512 * 4; byte++ )
+	{
+		if ( testDataPtr[byte] != (231 + byte) % 255 )
+		{
+			while ( true )
+			{
+				// LLPD::usart_log( LOGGING_USART_NUM, "Failed to read correct values sd card! -------------------------------" );
+			}
+		}
+	}
+
 	// fill framebuffers
 	OutputSurface surface;
 	if ( ! surface.placeGraphicsObjectsInMemory((uint8_t*) SDRAM2_MEM_START, SDRAM_SIZE) )
